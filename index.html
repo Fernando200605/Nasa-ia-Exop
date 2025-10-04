@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Clasificador de Exoplanetas 🔭</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; }
+    h1 { color: darkblue; }
+    form { margin-bottom: 20px; }
+    input, button { margin: 5px; padding: 8px; }
+    .result { background: #f0f0f0; padding: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Clasificador de Exoplanetas 🔭</h1>
+
+  <!-- Subir dataset -->
+  <h2>Entrenar modelo con CSV</h2>
+  <form id="trainForm">
+    <input type="file" id="csvFile" accept=".csv" required>
+    <button type="submit">Entrenar</button>
+  </form>
+  <div id="trainResult" class="result"></div>
+
+  <button id="statsBtn">Ver estadísticas</button>
+  <div id="statsResult" class="result"></div>
+
+  <hr>
+
+  <!-- Predicción manual -->
+  <h2>Predicción manual</h2>
+  <form id="predictForm">
+    <input type="number" step="any" id="period" placeholder="Periodo orbital" required>
+    <input type="number" step="any" id="duration" placeholder="Duración tránsito" required>
+    <input type="number" step="any" id="prad" placeholder="Radio planetario" required>
+    <input type="number" step="any" id="depth" placeholder="Profundidad tránsito" required>
+    <button type="submit">Predecir</button>
+  </form>
+  <div id="predictResult" class="result"></div>
+
+  <script>
+    // ========================
+    // Entrenar modelo
+    // ========================
+    document.getElementById("trainForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById("csvFile");
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+
+      const res = await fetch("http://127.0.0.1:5000/train", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+      document.getElementById("trainResult").innerHTML = `
+        <h3>Resultados del Modelo</h3>
+        <p><b>Precisión:</b> ${(data.accuracy * 100).toFixed(2)}%</p>
+        <pre>${JSON.stringify(data.report, null, 2)}</pre>
+      `;
+    });
+
+    // ========================
+    // Ver estadísticas
+    // ========================
+    document.getElementById("statsBtn").addEventListener("click", async () => {
+      const res = await fetch("http://127.0.0.1:5000/stats");
+      const data = await res.json();
+
+      if (data.error) {
+        document.getElementById("statsResult").innerHTML = `<p style="color:red">${data.error}</p>`;
+        return;
+      }
+
+      document.getElementById("statsResult").innerHTML = `
+        <h3>Estadísticas actuales</h3>
+        <p><b>Precisión:</b> ${(data.accuracy * 100).toFixed(2)}%</p>
+        <pre>${JSON.stringify(data.report, null, 2)}</pre>
+      `;
+    });
+
+    // ========================
+    // Predicción manual
+    // ========================
+    document.getElementById("predictForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        koi_period: parseFloat(document.getElementById("period").value),
+        koi_duration: parseFloat(document.getElementById("duration").value),
+        koi_prad: parseFloat(document.getElementById("prad").value),
+        koi_depth: parseFloat(document.getElementById("depth").value)
+      };
+
+      const res = await fetch("http://127.0.0.1:5000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      document.getElementById("predictResult").innerHTML = `
+        <h3>Predicción</h3>
+        <p><b>Resultado:</b> ${data.prediction}</p>
+      `;
+    });
+  </script>
+</body>
+</html>
