@@ -1,0 +1,200 @@
+/* styles.css */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-image: url(/imagenes/pexels-umkreisel-app-956999.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: #f8fafc;
+  margin: 0;
+  padding: 0;
+
+}
+
+header {
+  background-image: url(/imagenes/54285080613_a4866396a0_k.jpg);
+  background-size: cover;
+  background-position: center;
+  position: sticky;
+  top: 0;
+  padding: 40px;
+  height: 12rem;
+  text-align: center;
+  color: #000000;
+  font-size: 4rem; /* Reducido para evitar desbordamiento en móvil */
+  font-weight: bold;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  position: relative; /* 🔑 necesario para posicionar la imagen dentro */
+  overflow: hidden; /* Evita que la imagen salga del header */
+}
+
+header img {
+  position: absolute;
+  top: -16rem; /* Ajustado para que no esté tan arriba */
+  right: 40rem; /* Usa 'rem' relativo, no px fijos */
+  height: 50rem; /* Altura fija razonable */
+  width: auto; /* Mantiene proporción */
+  max-width: 30%; /* No ocupa más del 30% del ancho del header */
+  border-radius: 16px;
+  object-fit: contain; /* Evita distorsión */
+  z-index: 2;
+}
+
+.container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 0 15px;
+}
+
+.card {
+  background: #1e293b;
+  padding: 25px;
+  margin: 20px 0;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+}
+
+
+h2 i{
+  font-size: 5px;
+  width: 100px;
+}
+h2 {
+  margin-top: 0;
+  color: #38bdf8;
+  font-size: 1.4rem;
+}
+
+input[type="file"],
+input[type="number"] {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f1f5f9;
+  font-size: 1rem;
+}
+
+button {
+  background: #38bdf8;
+  color: #0f172a;
+  font-weight: bold;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 1rem;
+}
+
+button:hover {
+  background: #0ea5e9;
+}
+
+.result {
+  margin-top: 15px;
+  padding: 15px;
+  border-radius: 10px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  font-size: 0.95rem;
+  color: #f1f5f9;
+  white-space: pre-wrap;
+}
+
+.error {
+  color: #f87171;
+  font-weight: bold;
+}
+
+pre {
+  background: #1e293b;
+  padding: 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+  color: #e2e8f0;
+  margin: 8px 0;
+}
+
+.mode-selector {
+  text-align: center;
+  margin: 15px 0;
+}
+
+.mode-selector button {
+  margin: 5px;
+}
+
+/* Ocultar descripciones en modo experto */
+.expert-mode .card > p:first-child {
+  display: none !important;
+}
+
+/* Estilos compactos para modo experto */
+.expert-mode .card {
+  padding: 15px;
+  margin: 10px 0;
+}
+
+.expert-mode h2 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.expert-mode input[type="number"],
+.expert-mode input[type="file"] {
+  padding: 8px;
+  font-size: 0.9rem;
+}
+
+.expert-mode button {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+
+.expert-mode .result {
+  padding: 8px;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+  h2 { font-size: 1.2rem; }
+  button { width: 100%; }
+}
+
+/* En pantallas pequeñas (móviles) */
+@media (max-width: 768px) {
+  header {
+    font-size: 2.5rem;
+    padding: 25px 15px;
+    height: 10rem;
+  }
+
+  header img {
+    height: 7rem;
+    right: 1rem;
+    top: -1.5rem;
+    max-width: 40%; /* Más ancho relativo en móvil */
+  }
+}
+
+/* En pantallas muy pequeñas */
+@media (max-width: 480px) {
+  header {
+    font-size: 2rem;
+    height: 9rem;
+    padding: 20px 10px;
+  }
+
+  header img {
+    height: 6rem;
+    right: 0.5rem;
+    top: -1rem;
+  }
+}

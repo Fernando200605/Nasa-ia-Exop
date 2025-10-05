@@ -2,109 +2,329 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Clasificador de Exoplanetas 🔭</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 30px; }
-    h1 { color: darkblue; }
-    form { margin-bottom: 20px; }
-    input, button { margin: 5px; padding: 8px; }
-    .result { background: #f0f0f0; padding: 10px; border-radius: 8px; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔭 Exoplanet Classifier</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Clasificador de Exoplanetas 🔭</h1>
 
-  <!-- Subir dataset -->
-  <h2>Entrenar modelo con CSV</h2>
-  <form id="trainForm">
-    <input type="file" id="csvFile" accept=".csv" required>
-    <button type="submit">Entrenar</button>
-  </form>
-  <div id="trainResult" class="result"></div>
+  <header>
+    <img src="/imagenes/logo.png" alt="">
+    <h2 style="padding: 20px; color: black; margin-top: 10rem;">Busaca, analiza y encuentra</h2>
+  </header>
 
-  <button id="statsBtn">Ver estadísticas</button>
-  <div id="statsResult" class="result"></div>
+  <div class="container">
 
-  <hr>
+    <!-- Selector de Modo -->
+    <div class="mode-selector">
+      <button onclick="setMode('basic')"> Modo Intuitivo</button>
+      <button onclick="setMode('expert')"> Modo Experto</button>
+    </div>
 
-  <!-- Predicción manual -->
-  <h2>Predicción manual</h2>
-  <form id="predictForm">
-    <input type="number" step="any" id="period" placeholder="Periodo orbital" required>
-    <input type="number" step="any" id="duration" placeholder="Duración tránsito" required>
-    <input type="number" step="any" id="prad" placeholder="Radio planetario" required>
-    <input type="number" step="any" id="depth" placeholder="Profundidad tránsito" required>
-    <button type="submit">Predecir</button>
-  </form>
-  <div id="predictResult" class="result"></div>
+    <!-- Entrenamiento -->
+    <div class="card">
+      <h2><i class="fi fi-rr-folder-open"></i> Cargar datos de exoplanetas</h2>
+      <p><strong>Paso 1:</strong> Sube uno o más archivos CSV o Excel (.xlsx) con datos de exoplanetas.</p>
+      <p class="step-description">El sistema analizará los datos del telescopio Kepler para entrenar un modelo de inteligencia artificial. Este modelo aprenderá a distinguir entre planetas confirmados, candidatos y falsos positivos basándose en características como el periodo orbital, duración del tránsito, radio planetario y profundidad del tránsito.</p>
+      <input type="file" id="trainFiles" multiple accept=".csv,.xlsx">
+      <button onclick="trainModel()"> Entrenar Modelo</button>
+      <div id="trainResult"></div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="card">
+      <h2>Resultados del análisis</h2>
+      <p><strong>Paso 2:</strong> Consulta el rendimiento del modelo entrenado.</p>
+      <p class="step-description">Aquí podrás ver qué tan preciso es el modelo para clasificar exoplanetas. La precisión (accuracy) indica el porcentaje de predicciones correctas. Un buen modelo debería tener una precisión superior al 90%. También verás cuántos datos fueron procesados para el entrenamiento.</p>
+      <button onclick="getStats()"> Ver Estadísticas</button>
+      <div id="statsResult"></div>
+    </div>
+
+    <!-- Predicciones -->
+    <div class="card">
+      <h2>🔮 ¿Es un planeta?</h2>
+      <p><strong>Paso 3:</strong> Realiza predicciones con nuevos datos observacionales.</p>
+      <p class="step-description">Ingresa los valores de las características observadas de un objeto celeste para que el modelo prediga si es un planeta confirmado, un candidato o un falso positivo. Puedes usar los ejemplos predefinidos o ingresar tus propios valores.</p>
+      
+      <!-- Botones de relleno rápido -->
+      <div class="quick-fill">
+        <button onclick="fillExample('jupiter')">🪐 Júpiter Caliente</button>
+        <button onclick="fillExample('earth')">🌍 Tierra Habitable</button>
+        <button onclick="fillExample('super')">🌎 Super-Tierra</button>
+        <button onclick="fillExample('neptune')">🔵 Neptuno</button>
+        <button onclick="fillExample('weak')">⚠️ Señal Débil</button>
+      </div>
+
+      <div class="input-description">
+        <p>🔹 <strong>Periodo orbital (koi_period):</strong> Tiempo que tarda el objeto en completar una órbita alrededor de su estrella (en días).</p>
+        <p>🔹 <strong>Duración del tránsito (koi_duration):</strong> Tiempo que dura el tránsito del objeto frente a su estrella (en horas).</p>
+        <p>🔹 <strong>Radio planetario (koi_prad):</strong> Tamaño del objeto relativo al radio de la Tierra.</p>
+        <p>🔹 <strong>Profundidad del tránsito (koi_depth):</strong> Reducción en el brillo de la estrella cuando el objeto pasa frente a ella (en partes por millón).</p>
+        <p>🔹 <strong>Temperatura estelar (koi_steff):</strong> Temperatura efectiva de la estrella anfitriona (en Kelvin).</p>
+        <p>🔹 <strong>Gravedad superficial estelar (koi_slogg):</strong> Logaritmo de la gravedad superficial de la estrella.</p>
+        <p>🔹 <strong>Radio estelar (koi_srad):</strong> Radio de la estrella relativo al radio del Sol.</p>
+        <p>🔹 <strong>Temperatura de equilibrio (koi_teq):</strong> Temperatura estimada del planeta (en Kelvin).</p>
+        <p>🔹 <strong>Relación Señal-Ruido (koi_model_snr):</strong> Calidad de la señal de tránsito detectada.</p>
+      </div>
+
+      <label>Periodo Orbital (días)</label>
+      <input type="number" step="any" id="koi_period" placeholder="Ej: 365">
+      
+      <label>Duración del Tránsito (horas)</label>
+      <input type="number" step="any" id="koi_duration" placeholder="Ej: 6.5">
+      
+      <label>Radio Planetario (radios terrestres)</label>
+      <input type="number" step="any" id="koi_prad" placeholder="Ej: 1.2">
+      
+      <label>Profundidad del Tránsito (ppm)</label>
+      <input type="number" step="any" id="koi_depth" placeholder="Ej: 850">
+      
+      <label>Temperatura Estelar (Kelvin)</label>
+      <input type="number" step="any" id="koi_steff" placeholder="Ej: 5778">
+      
+      <label>Gravedad Superficial Estelar (log)</label>
+      <input type="number" step="any" id="koi_slogg" placeholder="Ej: 4.4">
+      
+      <label>Radio Estelar (radios solares)</label>
+      <input type="number" step="any" id="koi_srad" placeholder="Ej: 1.0">
+      
+      <label>Temperatura de Equilibrio (Kelvin)</label>
+      <input type="number" step="any" id="koi_teq" placeholder="Ej: 288">
+      
+      <label>Relación Señal-Ruido (SNR)</label>
+      <input type="number" step="any" id="koi_model_snr" placeholder="Ej: 45.3">
+      
+      <button onclick="makePrediction()">🔮 Predecir</button>
+      <div id="predictResult"></div>
+    </div>
+  </div>
 
   <script>
-    // ========================
-    // Entrenar modelo
-    // ========================
-    document.getElementById("trainForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const fileInput = document.getElementById("csvFile");
-      const formData = new FormData();
-      formData.append("file", fileInput.files[0]);
+    const API_URL = "http://127.0.0.1:5000";
+    let currentMode = "basic";
 
-      const res = await fetch("http://127.0.0.1:5000/train", {
-        method: "POST",
-        body: formData
-      });
+    // Ejemplos predefinidos de planetas
+    const examples = {
+      jupiter: {
+        koi_period: 3.5,
+        koi_duration: 4.2,
+        koi_prad: 12.5,
+        koi_depth: 3500,
+        koi_steff: 5800,
+        koi_slogg: 4.4,
+        koi_srad: 1.1,
+        koi_teq: 1500,
+        koi_model_snr: 85.5
+      },
+      earth: {
+        koi_period: 365,
+        koi_duration: 6.5,
+        koi_prad: 1.2,
+        koi_depth: 85,
+        koi_steff: 5700,
+        koi_slogg: 4.5,
+        koi_srad: 1.0,
+        koi_teq: 280,
+        koi_model_snr: 45.3
+      },
+      super: {
+        koi_period: 12.5,
+        koi_duration: 5.8,
+        koi_prad: 2.8,
+        koi_depth: 450,
+        koi_steff: 6200,
+        koi_slogg: 4.3,
+        koi_srad: 1.3,
+        koi_teq: 850,
+        koi_model_snr: 62.1
+      },
+      neptune: {
+        koi_period: 2.1,
+        koi_duration: 3.5,
+        koi_prad: 4.5,
+        koi_depth: 1200,
+        koi_steff: 5500,
+        koi_slogg: 4.4,
+        koi_srad: 0.95,
+        koi_teq: 1800,
+        koi_model_snr: 110.5
+      },
+      weak: {
+        koi_period: 15.2,
+        koi_duration: 2.1,
+        koi_prad: 0.5,
+        koi_depth: 15,
+        koi_steff: 4500,
+        koi_slogg: 4.8,
+        koi_srad: 0.8,
+        koi_teq: 600,
+        koi_model_snr: 8.2
+      }
+    };
 
-      const data = await res.json();
-      document.getElementById("trainResult").innerHTML = `
-        <h3>Resultados del Modelo</h3>
-        <p><b>Precisión:</b> ${(data.accuracy * 100).toFixed(2)}%</p>
-        <pre>${JSON.stringify(data.report, null, 2)}</pre>
-      `;
-    });
+    function fillExample(type) {
+      const data = examples[type];
+      for (let key in data) {
+        const element = document.getElementById(key);
+        if (element) element.value = data[key];
+      }
+    }
 
-    // ========================
-    // Ver estadísticas
-    // ========================
-    document.getElementById("statsBtn").addEventListener("click", async () => {
-      const res = await fetch("http://127.0.0.1:5000/stats");
-      const data = await res.json();
+    function setMode(mode) {
+      currentMode = mode;
+      if (mode === "expert") {
+        document.body.classList.add("expert-mode");
+        document.querySelectorAll('.card > p, .step-description, .input-description, label, .quick-fill').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+          input.placeholder = input.id;
+        });
+      } else {
+        document.body.classList.remove("expert-mode");
+        document.querySelectorAll('.card > p, .step-description, .input-description, label, .quick-fill').forEach(el => el.style.display = '');
+        document.getElementById("koi_period").placeholder = "Ej: 365";
+        document.getElementById("koi_duration").placeholder = "Ej: 6.5";
+        document.getElementById("koi_prad").placeholder = "Ej: 1.2";
+        document.getElementById("koi_depth").placeholder = "Ej: 850";
+        document.getElementById("koi_steff").placeholder = "Ej: 5778";
+        document.getElementById("koi_slogg").placeholder = "Ej: 4.4";
+        document.getElementById("koi_srad").placeholder = "Ej: 1.0";
+        document.getElementById("koi_teq").placeholder = "Ej: 288";
+        document.getElementById("koi_model_snr").placeholder = "Ej: 45.3";
+      }
+    }
+    
+    async function parseResponse(res) {
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        return await res.json();
+      } else {
+        const text = await res.text();
+        throw new Error("Respuesta no es JSON:\n" + text.slice(0, 400));
+      }
+    }
 
-      if (data.error) {
-        document.getElementById("statsResult").innerHTML = `<p style="color:red">${data.error}</p>`;
+    async function trainModel() {
+      const files = document.getElementById("trainFiles").files;
+      if (files.length === 0) {
+        alert("Selecciona al menos un archivo CSV o Excel (.xlsx).");
         return;
       }
 
-      document.getElementById("statsResult").innerHTML = `
-        <h3>Estadísticas actuales</h3>
-        <p><b>Precisión:</b> ${(data.accuracy * 100).toFixed(2)}%</p>
-        <pre>${JSON.stringify(data.report, null, 2)}</pre>
-      `;
-    });
+      const formData = new FormData();
+      for (let file of files) formData.append("files", file);
 
-    // ========================
-    // Predicción manual
-    // ========================
-    document.getElementById("predictForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+      try {
+        const res = await fetch(`${API_URL}/train`, { method: "POST", body: formData });
+        const data = await parseResponse(res);
 
+        if (data.error) {
+          document.getElementById("trainResult").innerHTML = `<p class="error">❌ ${data.error}</p>`;
+          return;
+        }
+
+        if (currentMode === "basic") {
+          document.getElementById("trainResult").innerHTML = `
+            <div class="result">
+              <h3>✅ Modelo entrenado</h3>
+              <p><b>Precisión:</b> ${(data.accuracy * 100).toFixed(2)}%</p>
+              <p><b>Datos analizados:</b> ${data.rows_after}</p>
+              <p>🟢 Confirmados: ${(data.class_balance.CONFIRMED*100).toFixed(1)}%<br>
+                 🟡 Candidatos: ${(data.class_balance.CANDIDATE*100).toFixed(1)}%<br>
+                 🔴 Falsos positivos: ${(data.class_balance["FALSE POSITIVE"]*100).toFixed(1)}%</p>
+            </div>`;
+        } else {
+          document.getElementById("trainResult").innerHTML = `
+            <div class="result">
+              <p><b>ACC:</b> ${(data.accuracy * 100).toFixed(2)}% | <b>N:</b> ${data.rows_after} | <b>CONF:</b> ${(data.class_balance.CONFIRMED*100).toFixed(1)}% | <b>CAND:</b> ${(data.class_balance.CANDIDATE*100).toFixed(1)}% | <b>FP:</b> ${(data.class_balance["FALSE POSITIVE"]*100).toFixed(1)}%</p>
+            </div>`;
+        }
+      } catch (err) {
+        document.getElementById("trainResult").innerHTML = `<p class="error">❌ Error: ${err.message}</p>`;
+      }
+    }
+
+    async function getStats() {
+      try {
+        const res = await fetch(`${API_URL}/stats`);
+        const data = await parseResponse(res);
+
+        if (data.error) {
+          document.getElementById("statsResult").innerHTML = `<p class="error">❌ ${data.error}</p>`;
+          return;
+        }
+
+        if (currentMode === "basic") {
+          document.getElementById("statsResult").innerHTML = `
+            <div class="result">
+              <h3>📊 Resumen</h3>
+              <p><b>Precisión:</b> ${(data.accuracy * 100).toFixed(2)}%</p>
+              <p>Modelo entrenado con <b>${data.rows_after}</b> registros válidos.</p>
+            </div>`;
+        } else {
+          document.getElementById("statsResult").innerHTML = `
+            <div class="result">
+              <p><b>ACC:</b> ${(data.accuracy * 100).toFixed(2)}% | <b>N:</b> ${data.rows_after}</p>
+            </div>`;
+        }
+      } catch (err) {
+        document.getElementById("statsResult").innerHTML = `<p class="error">❌ Error: ${err.message}</p>`;
+      }
+    }
+
+    async function makePrediction() {
       const payload = {
-        koi_period: parseFloat(document.getElementById("period").value),
-        koi_duration: parseFloat(document.getElementById("duration").value),
-        koi_prad: parseFloat(document.getElementById("prad").value),
-        koi_depth: parseFloat(document.getElementById("depth").value)
+        koi_period: parseFloat(document.getElementById("koi_period").value),
+        koi_duration: parseFloat(document.getElementById("koi_duration").value),
+        koi_prad: parseFloat(document.getElementById("koi_prad").value),
+        koi_depth: parseFloat(document.getElementById("koi_depth").value),
+        koi_steff: parseFloat(document.getElementById("koi_steff").value),
+        koi_slogg: parseFloat(document.getElementById("koi_slogg").value),
+        koi_srad: parseFloat(document.getElementById("koi_srad").value),
+        koi_teq: parseFloat(document.getElementById("koi_teq").value),
+        koi_model_snr: parseFloat(document.getElementById("koi_model_snr").value)
       };
 
-      const res = await fetch("http://127.0.0.1:5000/predict", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+      for (let key in payload) {
+        if (isNaN(payload[key]) || payload[key] === null) {
+          alert(`Por favor ingresa un valor numérico válido para ${key}`);
+          return;
+        }
+      }
 
-      const data = await res.json();
-      document.getElementById("predictResult").innerHTML = `
-        <h3>Predicción</h3>
-        <p><b>Resultado:</b> ${data.prediction}</p>
-      `;
-    });
+      try {
+        const res = await fetch(`${API_URL}/predict`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await parseResponse(res);
+
+        if (data.error) {
+          document.getElementById("predictResult").innerHTML = `<p class="error">❌ ${data.error}</p>`;
+          return;
+        }
+
+        if (currentMode === "basic") {
+          const emoji = data.prediction.toLowerCase().includes('confirmed') ? '✅' :
+                        data.prediction.toLowerCase().includes('candidate') ? '🟡' : '❌';
+          document.getElementById("predictResult").innerHTML = `
+            <div class="result">
+              <h3>🔮 Predicción</h3>
+              <p><b>Clasificación:</b> ${emoji} ${data.prediction}</p>
+              <p><b>Confianza:</b> ${data.confidence.toFixed(2)}%</p>
+            </div>`;
+        } else {
+          const classShort = data.prediction.includes('CONFIRMED') ? 'CONF' :
+                             data.prediction.includes('CANDIDATE') ? 'CAND' : 'FP';
+          document.getElementById("predictResult").innerHTML = `
+            <div class="result">
+              <p><b>${classShort}</b> (${data.confidence.toFixed(2)}%)</p>
+            </div>`;
+        }
+      } catch (err) {
+        document.getElementById("predictResult").innerHTML = `<p class="error">❌ Error: ${err.message}</p>`;
+      }
+    }
   </script>
 </body>
 </html>
