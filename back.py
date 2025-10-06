@@ -16,7 +16,6 @@ from collections import Counter
 import joblib
 import time
 
-# === Importaciones opcionales ===
 XGBOOST_AVAILABLE = False
 SMOTE_AVAILABLE = False
 
@@ -32,7 +31,7 @@ try:
 except ImportError:
     pass
 
-# === Configuración ===
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -49,14 +48,13 @@ DERIVED_FEATURES = ['snr_per_period', 'temp_norm', 'prad_srad_ratio']
 app = Flask(__name__)
 CORS(app)
 
-# Variables globales
 model = None
 metrics = None
 train_data = None
 imputer = None
 
 
-# === Funciones auxiliares ===
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -143,7 +141,6 @@ def train_xgboost_fast(X_train, y_train):
     return model, params_used
 
 
-# === Endpoints ===
 @app.route('/train', methods=['POST'])
 def train_model():
     global model, metrics, train_data, imputer
@@ -188,7 +185,7 @@ def train_model():
         data = pd.concat(dfs, ignore_index=True)
         train_data = data.copy()
 
-        # Validar columnas
+
         missing = [col for col in ORIGINAL_REQUIRED_COLUMNS + [TARGET_COLUMN] if col not in data.columns]
         if missing:
             raise ValueError(f"Faltan columnas: {missing}")
